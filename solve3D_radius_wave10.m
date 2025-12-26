@@ -8,7 +8,7 @@ para.solution = struct('dx', 50e-6,'dz', 10e-6, 'dt', 2e-9, 'nt', 8000); % 空�
 wd = 0.5 - 0.5 * cos(2 * pi * 1e6 * para.solution.dt * (1:round(1/1e6/ para.solution.dt))); % 送波1MHz
 para.wave = single(sin(2 * pi * 1e6 *  para.solution.dt * (1:round(1/1e6/ para.solution.dt)*10)));
 
-model = 'model/model_Test_50u_rotate0';
+model = 'model/model_Test_100u';
 
 flag = true;
 % flag = false;
@@ -20,7 +20,9 @@ gpuDeviceTable
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 load(model);
-
+volumeViewer(input_model)
+volumeViewer(is_model)
+%%
 [nx, ny, nz] = size(input_model);
 nx = single(nx);
 ny = single(ny);
