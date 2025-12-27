@@ -9,9 +9,9 @@ load('group1_9_adjustment_model.mat')
 % トランスデューサの場所は以下の条件
 % 
 % 骨孔（直径1.6mm）の直上10mm
-% 骨孔の中心座標 (x, y, z) = (172 + 100 = 272, 256, 108)
+% 骨孔の中心座標 (x, y, z) = (172 + 100 = 272, 256, 100+108 = 208)
 % モデルのx方向の先頭に何も存在しない空間を100程足して、距離10mmを確保
-% トランスデューサの中心座標 (x, y, z) = (272 - 227 = 45, 256, 108)
+% トランスデューサの中心座標 (x, y, z) = (272 - 227 = 45, 256, 100 + 108 = 208)
 
 % CTの空間分解能は今回44μm
 dx = 44e-6; 
@@ -60,10 +60,19 @@ end
 % 骨部分を除去
 input_model(transducer_x + 1:end, :, :) = 0;
 
+% replace water
+re_adjustment_model(re_adjustment_model == 0) = 1e+3;
+
 % 計算を少しでも軽くするために単精度に
 model = single(re_adjustment_model);
 
 %% モデルとして出力
-path = "rat-tibia-model";
+outDir = "../";
 
-save rat-tibia-model model is_model input_model
+outFile = fullfile(outDir, "rat-tibia-model.mat");
+
+save(outFile, "model", "is_model", "input_model", "-v7.3");  % 大きい配列なら -v7.3 推奨
+
+% path = "../rat-tibia-model";
+% 
+% save(path, model, is_model, input_model)
