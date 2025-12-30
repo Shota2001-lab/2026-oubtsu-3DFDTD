@@ -4,7 +4,7 @@ clear
 close all
 %等方性　境界の圧電性カット
 %%
-para.solution = struct('dx', 44e-6, 'dt', 5e-9, 'nt', 5000); % 空間、時間分解能は1.5MHzで計算すること
+para.solution = struct('dx', 44e-6, 'dt', 5e-9, 'nt', 8000); % 空間、時間分解能は1.5MHzで計算すること
 wd = 0.5 - 0.5 * cos(2 * pi * 1.5e6 * para.solution.dt * (1:round(1/1.5e6/ para.solution.dt)));
 para.wave = single(sin(2 * pi * 1.5e6 *  para.solution.dt * (1:round(1/1.5e6/ para.solution.dt)*10)));
 
@@ -52,9 +52,6 @@ figure;
 input_wave = single(zeros(1, para.solution.nt * 2));
 input_wave(1, 1:length(para.wave)) = para.wave;
 
-figure;
-plot(input_wave)
-
 %%
 if flag
   run 'const/gpu_matrix_ForFDTD'
@@ -71,9 +68,20 @@ c = round(15e-3/ para.solution.dx/2);
 
 tt = gpuArray(zeros(1, para.solution.nt));
 
-dataTxx = gpuArray(single(zeros(para.solution.nt, 1)));
-dataTxy = gpuArray(single(zeros(para.solution.nt, 1)));
-dataTzz = gpuArray(single(zeros(para.solution.nt, 1)));
+hole_x = 290;
+hole_y = 256;
+hole_z = 208;
+
+range_y = 156:356;
+range_z = 100:300;
+
+outDirTxy = 'Result/Txy';
+outDirTyz = 'Result/Tyz';
+outDirTzx = 'Result/Tzx';
+
+dataTxy = gpuArray(single(zeros(ny, nz)));
+dataTyz = gpuArray(single(zeros(ny, nz)));
+dataTzx = gpuArray(single(zeros(ny, nz)));
 
 
 tic
@@ -96,12 +104,23 @@ for s = 1:para.solution.nt
   if rem(s, 10) == 0
     drawnow
     %%
-    subplot(2,2,1); imagesc(squeeze(Txx(:, 256, :))); axis equal tight; caxis([-0.5 0.5]); % z=200がPLLAフィルムの座標
-    subplot(2,2,2); imagesc(squeeze(Tyy(:, 256, :))); axis equal tight; caxis([-0.5 0.5]);
-    subplot(2,2,3); imagesc(squeeze(Txy(:, 256, :))); axis equal tight; 
+    subplot(2,2,1); imagesc(squeeze(Txx(hole_x, range_y, range_z))); axis equal tight; caxis([-0.5 0.5]);
+    subplot(2,2,2); imagesc(squeeze(Txy(hole_x, range_y, range_z))); axis equal tight; 
+    subplot(2,2,3); imagesc(squeeze(Tyz(hole_x, range_y, range_z))); axis equal tight;
+    subplot(2,2,4); imagesc(squeeze(Tzx(hole_x, range_y, range_z))); axis equal tight; 
+    saveas(gcf, sprintf('image_per100/image_%04d.png', s))
+    
+    %% 観測波形
+    dataTxy = Txy(hole_x, range_y, range_z);
+    dataTyz = Txy(hole_x, range_y, range_z);
+    dataTzx = Txy(hole_x, range_y, range_z);
 
-    %%
-    saveas(gcf, sprintf('image10/image_%04d.png', s))
+    fileName_Txy = fullfile(outDirTxy, sprintf("wave10_Txy_%04d.csv", s));
+    fileName_Tyz = fullfile(outDirTyz, sprintf("wave10_Tyz_%04d.csv", s));
+    fileName_Tzx = fullfile(outDirTzx, sprintf("wave10_Tzx_%04d.csv", s));
+    writematrix(dataTxy,fileName_Txy);
+    writematrix(dataTyz,fileName_Tyz)
+    writematrix(dataTzx,fileName_Tzx)
   end
 
   clc
@@ -109,26 +128,9 @@ for s = 1:para.solution.nt
   time = toc / s * (para.solution.nt - s);
   tt(1, s) = time;
   sprintf('残り時間: %d時間 %d分%0.3f秒', round(rem(time / 3600, 60)), rem(round(time / 60), 60), round(rem(time, 60), 3))
-  %% 観測波形
-  dataTxx(s, 1) = Txx(280, 260, 110);
-  dataTxy(s, 1) = Txy(280, 260, 110);
-  dataTzz(s, 1) = Tzz(280, 260, 110);
+
+  
 
 end
 T = toc
-
-%% 
-
-figure;
-plot(dataTxx)
-
-figure(2);
-plot(dataTzz)
-
-figure(3);
-plot(dataTxy);
-
-writematrix(dataTxx,'wave1_Txx.csv')
-writematrix(dataTxy,'wave1_Txy.csv')
-writematrix(dataTzz,'wave1_Tzz.csv')
 

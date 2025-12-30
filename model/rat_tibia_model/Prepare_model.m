@@ -59,14 +59,15 @@ end
 % 出力モデルのファイル名
 outfile = 'group1_9_cut_density.mat';
 save(outfile, 'new_model');
-%% 骨密度の平均値を1g/cm^3に
+%% 骨密度の平均値を1.3g/cm^3に
 
 % BMDの平均値
 not_zero_values = new_model(new_model ~= 0);
 bmd_avg = round(mean(not_zero_values));
 
-% ラット脛骨の骨密度とBMDが線形だと仮定して、平均の骨密度が1g/cm^3(仮）になるように調整
-adjustment_model = new_model*1e+6/bmd_avg;
+% ラット脛骨の骨密度とBMDが線形だと仮定して、平均の骨密度が1.3g/cm^3(仮）になるように調整
+% wada IEEE mice density
+adjustment_model = new_model*1.3e+6/bmd_avg;
 
 imagesc(adjustment_model(:,:,110));
 

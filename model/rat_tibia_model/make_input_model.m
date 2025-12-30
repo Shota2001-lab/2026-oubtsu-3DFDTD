@@ -76,3 +76,7 @@ save(outFile, "model", "is_model", "input_model", "-v7.3");  % 大きい配列�
 % path = "../rat-tibia-model";
 % 
 % save(path, model, is_model, input_model)
+
+%% 
+figure;
+imagesc(squeeze(model(290, 156:356, 100:300)))
