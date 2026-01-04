@@ -4,9 +4,9 @@ clear
 close all
 %等方性　境界の圧電性カット
 %%
-para.solution = struct('dx', 44e-6, 'dt', 5e-9, 'nt', 8000); % 空間、時間分解能は1.5MHzで計算すること
+para.solution = struct('dx', 44e-6, 'dt', 5e-9, 'nt', 5000); % 空間、時間分解能は1.5MHzで計算すること
 wd = 0.5 - 0.5 * cos(2 * pi * 1.5e6 * para.solution.dt * (1:round(1/1.5e6/ para.solution.dt)));
-para.wave = single(sin(2 * pi * 1.5e6 *  para.solution.dt * (1:round(1/1.5e6/ para.solution.dt)*10)));
+para.wave = single(sin(2 * pi * 1.5e6 *  para.solution.dt * (1:round(1/1.5e6/ para.solution.dt)*5)));
 
 %%
 hann_wd = hann(numel(para.wave));   % ← numel or length が正解
@@ -18,7 +18,7 @@ hann_wd = hann_wd.';
 figure;
 plot(para.wave)
 
-model = 'model/rat-tibia-model';
+model = 'model/rat-tibia-rotated-model';
 
 flag = true;
 % flag = false;
@@ -38,15 +38,17 @@ nz = single(nz);
 
 is_model_normal = single(is_model);
 is_model_normal(is_model_normal < 1) = 0;
-is_model_share = single(is_model_normal(1:end-1, 1:end-1, 1:end-1));
+is_model_share = single(meanMatrix(is_model_normal));
 is_model_share(is_model_share < 1) = 0;
 % rate = struct('axcial', 1 - 10^(-2.1/20 * 100 * para.solution.dx), 'normal', 1 - 10^(-3.1/20 * 100 * para.solution.dx), 'share', 1 - 10^(-5.2/20 * 100 * para.solution.dx));
 rate = struct('axcial', 0, 'normal', 0, 'share', 0); % 今回は減衰ゼロで回す
 run 'const/elastic_homo'
 %% モデルを見る
 volumeViewer(input_model)
+%%
 figure;
-
+imagesc(squeeze(model(440, 156:356, 150:350)))
+saveas(gcf, "cut_xslice.fig")
 
 %% 入力波形作成
 input_wave = single(zeros(1, para.solution.nt * 2));
@@ -68,16 +70,16 @@ c = round(15e-3/ para.solution.dx/2);
 
 tt = gpuArray(zeros(1, para.solution.nt));
 
-hole_x = 290;
+hole_x = 440;
 hole_y = 256;
-hole_z = 208;
+hole_z = 308;
 
 range_y = 156:356;
-range_z = 100:300;
+range_z = 150:350;
 
-outDirTxy = 'Result/Txy';
+outDirTxy = 'Result/Tyy';
 outDirTyz = 'Result/Tyz';
-outDirTzx = 'Result/Tzx';
+outDirTzx = 'Result/Tzz';
 
 dataTxy = gpuArray(single(zeros(ny, nz)));
 dataTyz = gpuArray(single(zeros(ny, nz)));
@@ -104,20 +106,20 @@ for s = 1:para.solution.nt
   if rem(s, 10) == 0
     drawnow
     %%
-    subplot(2,2,1); imagesc(squeeze(Txx(hole_x, range_y, range_z))); axis equal tight; caxis([-0.5 0.5]);
-    subplot(2,2,2); imagesc(squeeze(Txy(hole_x, range_y, range_z))); axis equal tight; 
-    subplot(2,2,3); imagesc(squeeze(Tyz(hole_x, range_y, range_z))); axis equal tight;
+    subplot(2,2,1); imagesc(squeeze(Txx(:, 256, :))); axis equal tight; caxis([-0.5 0.5]);
+    subplot(2,2,2); imagesc(squeeze(Tyy(:, 256, :))); axis equal tight; caxis([-0.5 0.5]);
+    subplot(2,2,3); imagesc(squeeze(Tzz(:, 256, :))); axis equal tight; caxis([-0.5 0.5]);
     subplot(2,2,4); imagesc(squeeze(Tzx(hole_x, range_y, range_z))); axis equal tight; 
     saveas(gcf, sprintf('image_per100/image_%04d.png', s))
     
     %% 観測波形
-    dataTxy = Txy(hole_x, range_y, range_z);
-    dataTyz = Txy(hole_x, range_y, range_z);
-    dataTzx = Txy(hole_x, range_y, range_z);
+    dataTxy = squeeze(Tyy(hole_x, range_y, range_z));
+    dataTyz = squeeze(Tyz(hole_x, range_y, range_z));
+    dataTzx = squeeze(Tzz(hole_x, range_y, range_z));
 
-    fileName_Txy = fullfile(outDirTxy, sprintf("wave10_Txy_%04d.csv", s));
+    fileName_Txy = fullfile(outDirTxy, sprintf("wave10_Tyy_%04d.csv", s));
     fileName_Tyz = fullfile(outDirTyz, sprintf("wave10_Tyz_%04d.csv", s));
-    fileName_Tzx = fullfile(outDirTzx, sprintf("wave10_Tzx_%04d.csv", s));
+    fileName_Tzx = fullfile(outDirTzx, sprintf("wave10_Tzz_%04d.csv", s));
     writematrix(dataTxy,fileName_Txy);
     writematrix(dataTyz,fileName_Tyz)
     writematrix(dataTzx,fileName_Tzx)
