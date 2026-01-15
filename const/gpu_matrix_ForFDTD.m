@@ -43,4 +43,3 @@ hig.hig16 = gpuArray(single(zeros(nx, 6, nz)));
 hig.hig17 = gpuArray(single(zeros(nx, ny, 6)));
 hig.hig18 = gpuArray(single(zeros(nx, ny, 6)));
 
-% data=(zeros(nt,2));

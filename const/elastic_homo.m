@@ -11,6 +11,8 @@ c33 = [K 18.1e9];
 c44 = [0 5.2e9];
 c66 = [0 5.2e9];
 
+
+
 if flag
     dtdx.density_x = gpuArray(para.solution.dt / para.solution.dx / ((model(2:nx, :, :) + model(1:nx - 1, :, :)) / 2));
     dtdx.density_y = gpuArray(para.solution.dt / para.solution.dx / ((model(:, 2:ny, :) + model(:, 1:ny - 1, :)) / 2));

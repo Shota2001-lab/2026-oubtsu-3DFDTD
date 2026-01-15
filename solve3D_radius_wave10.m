@@ -13,7 +13,7 @@ model = 'model/model_Test_100u';
 flag = true;
 % flag = false;
 %%
-gpuDevice(2);
+gpuDevice(1);
 gpuDeviceTable
 
 %% solve3D(para, 'model.mat', false);

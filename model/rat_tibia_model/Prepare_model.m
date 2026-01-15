@@ -67,10 +67,14 @@ bmd_avg = round(mean(not_zero_values));
 
 % ラット脛骨の骨密度とBMDが線形だと仮定して、平均の骨密度が1.3g/cm^3(仮）になるように調整
 % wada IEEE mice density
-adjustment_model = new_model*1.3e+6/bmd_avg;
+adjustment_model = new_model*2e+3/bmd_avg;
 
+%%
+figure;
+imagesc(new_model(:,:,110))
+figure;
 imagesc(adjustment_model(:,:,110));
 
 % 出力モデルのファイル名
-outfile = 'group1_9_adjustment_model.mat';
+outfile = 'group1_9_adjustment_model2.mat';
 save(outfile, 'adjustment_model');

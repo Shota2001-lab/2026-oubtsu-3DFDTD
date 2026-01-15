@@ -3,7 +3,7 @@ clear
 close all
 clc
 %% ノイズ除去＋座標軸調整済みのモデルを読み込み
-load('group1_9_adjustment_model.mat')
+load('group1_9_adjustment_model2.mat')
 
 %% 径14mmの円板上トランスデューサをboolで配置する。
 % トランスデューサの場所は以下の条件
@@ -13,7 +13,7 @@ load('group1_9_adjustment_model.mat')
 % モデルのx方向の先頭に何も存在しない空間を100程足して、距離10mmを確保
 % トランスデューサの中心座標 (x, y, z) = (422 - 227 = 195, 256, 100 + 108 = 208)
 
-% CTの空間分解能は今回44μm
+% CTの空間分解能は今回44μmrr
 dx = 44e-6; 
 
 [x_num, y_num, z_num] = size(adjustment_model);
@@ -62,7 +62,7 @@ end
 input_model(transducer_x + 1:end, :, :) = 0;
 
 % replace water
-re_adjustment_model(re_adjustment_model == 0) = 1e+3;
+re_adjustment_model(re_adjustment_model < 1000) = 1e+3;
 
 % 計算を少しでも軽くするために単精度に
 model = single(re_adjustment_model);
@@ -79,7 +79,7 @@ imagesc(squeeze(is_model(:,256,:)))
 %% モデルとして出力
 outDir = "../";
 
-outFile = fullfile(outDir, "rat-tibia-rotated-model.mat");
+outFile = fullfile(outDir, "rat-tibia-rotated-model2.mat");
 
 save(outFile, "model", "is_model", "input_model", "-v7.3");  % 大きい配列なら -v7.3 推奨
 
