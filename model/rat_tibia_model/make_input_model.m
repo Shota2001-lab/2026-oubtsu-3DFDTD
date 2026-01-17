@@ -45,7 +45,7 @@ is_model = re_adjustment_model ~= 0;
 input_model = is_model;
 
 % トランスデューサの直径
-diameter = 14e-3;
+diameter = 10e-3;
 
 for i = 1:y_num % 円板作成
     for k = 1:z_num
