@@ -15,7 +15,7 @@ hann_wd = hann_wd.';
 % hann window
 % para.wave = para.wave.*hann_wd;
 
-model = 'model/rat-tibia-model-5mm_distance';
+model = 'model/clinderModel-5mm_distance.mat';
 
 flag = true;
 % flag = false;
@@ -42,7 +42,7 @@ run 'const/elastic_homo'
 % volumeViewer(isModel + inputModel)
 %% 断面図の画像
 % figure;
-% imagesc(squeeze(model(holeX, rangeY, rangeZ)));
+% imagesc(squeeze(model(holeX, :, :)));
 
 % caxis([1000 5500]);
 % axis image;
@@ -89,7 +89,7 @@ figure;
 imagesc(squeeze(model(holeX,rangeY,rangeZ)))
 %% ここで出力先のディレクトリを用意してなければ作成する
 root = pwd;
-dirPath = fullfile(root, "Result_0117_1");
+dirPath = fullfile(root, "Result_0127_1");
 
 if ~isfolder(dirPath)
     mkdir(dirPath);

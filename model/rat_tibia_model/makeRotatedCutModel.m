@@ -17,7 +17,7 @@ load('group1_9_adjustment_model.mat')
 adjustmentModel = adjustmentModel(1:350, 81:431, 1:300);
 %%
 figure;
-imagesc(squeeze(adjustmentModel(:, 175, :)))
+imagesc(squeeze(adjustmentModel(:, :, 183)))
 %% 
 % CTの空間分解能は今回44μm
 dx = 44e-6; 
@@ -37,9 +37,12 @@ reAdjustmentModel = cat(3, reAdjustmentModel, addtionalModelZ);
 
 [xNum, yNum, zNum] = size(reAdjustmentModel);
 
+addtionalModelX = zeros(50, yNum, zNum);
+reAdjustmentModel = cat(1, addtionalModelX, reAdjustmentModel);
+
 %% トランスデューサ（直径14 mm）を配置
-% トランスデューサの中心座標 (x, y, z) = (172 - 114 = 58, 256 - 81, 108 + 75 = 183)
-transducerX = 172 - L5mmCellSize;
+% トランスデューサの中心座標 (x, y, z) = (172 - 114 + 50 = 108, 256 - 81, 108 + 75 = 183)
+transducerX = 172 - L5mmCellSize + 50;
 transducerY = 175;
 transducerZ = 108 + 75;
 
@@ -74,11 +77,14 @@ isModel = reAdjustmentModel ~= 1e+3;
 model = single(reAdjustmentModel);
 
 volumeViewer(isModel + inputModel)
-
+%% トランスデューサを回転
+rotatedInputModel = rotate3DMatrix(inputModel, 'y', 25);
+inputModel = rotatedInputModel ~= 0;
+volumeViewer(isModel + inputModel)
 %% モデルとして出力
 outDir = "../";
 
-outFile = fullfile(outDir, "clinderModel-5mm_distance.mat");
+outFile = fullfile(outDir, "rat-tibia-rotated25-model-5mm_distance.mat");
 
 save(outFile, "model", "isModel", "inputModel", "-v7.3");  % 大きい配列なら -v7.3 推奨
 
@@ -91,4 +97,4 @@ figure;
 imagesc(squeeze(inputModel(transducerX,:,:)))
 %% 
 figure;
-imagesc(squeeze(model(190,:,:)))
+imagesc(squeeze(model(:,175,:)))
